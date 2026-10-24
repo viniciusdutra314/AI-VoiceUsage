@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Manually monitor ChatGPT Voice usage over a sliding time window."""
+
 import math
 import pathlib
 import sqlite3
@@ -9,9 +11,10 @@ from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
-ROLLING_TIMER_DIR = pathlib.Path.home() / ".rolling_timer"
-DATABASE_FILE = ROLLING_TIMER_DIR / "time_intervals.sqlite3"
-CONFIG_FILE = ROLLING_TIMER_DIR / "config.toml"
+APP_NAME = "ai-voice-usage"
+AI_VOICE_USAGE_DIR = pathlib.Path.home() / f".{APP_NAME}"
+DATABASE_FILE = AI_VOICE_USAGE_DIR / "time_intervals.sqlite3"
+CONFIG_FILE = AI_VOICE_USAGE_DIR / "config.toml"
 ZERO_TIME = timedelta()
 
 
@@ -46,7 +49,7 @@ def db_load_intervals(db: sqlite3.Connection) -> Iterable[TimeInterval]:
         for start, end in db.execute("SELECT start_time, end_time FROM time_intervals")
     )
 
-2
+
 def db_start_session(db: sqlite3.Connection, now: datetime) -> int:
     cursor = db.execute(
         "INSERT INTO time_intervals (start_time, end_time) VALUES (?, ?)",
@@ -110,11 +113,11 @@ class App:
         self.session_id: int | None = None
         self.edit_job: str | None = None
 
-        root.title("Rolling Timer")
+        root.title(APP_NAME)
         root.configure(bg=BG)
         root.resizable(False, False)
         tk.Label(
-            root, text="Rolling Timer", bg=BG, fg=FG, font=("Arial", 13, "bold")
+            root, text=APP_NAME, bg=BG, fg=FG, font=("Arial", 13, "bold")
         ).pack(pady=(23, 17))
         self.time_label = tk.Label(
             root, text="00:00:00", bg=BG, fg=FG, font=("Arial", 34, "bold")
@@ -224,7 +227,7 @@ class App:
 
 
 def main() -> None:
-    ROLLING_TIMER_DIR.mkdir(parents=True, exist_ok=True)
+    AI_VOICE_USAGE_DIR.mkdir(parents=True, exist_ok=True)
     with closing(sqlite3.connect(DATABASE_FILE)) as db:
         db_init(db)
         root = tk.Tk()

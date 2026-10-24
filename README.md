@@ -1,12 +1,12 @@
-# Rolling Timer
+# ai-voice-usage
 
-A tiny, fully functional **sliding-window time tracker** written in Python.
+A small Python app for manually monitoring **ChatGPT Voice usage** over a sliding time window.
 
-Traditional clock apps such as [GNOME Clocks](https://apps.gnome.org/en/Clocks/) and [KDE Clock](https://apps.kde.org/kclock/) provide stopwatches and countdown timers, but don't offer rolling-window usage tracking as a documented feature. Rolling Timer fills that little gap: it shows **how much time you've used in the last N hours**.
+Track how much time you have spent using ChatGPT Voice in the last N hours. Press **Start** to track a session and **Stop** to save it. The total updates automatically as older sessions leave the window. You can change the window size directly in the app.
 
-![](image.png)
+## Motivation
 
-Press **Start** to track a session and **Stop** to save it. The total updates automatically—even while stopped, as older sessions leave the window. You can change the window size directly in the app.
+Shouldn’t the ChatGPT interface provide this information? Yes, it should, but apparently it doesn’t (last checked on October 24, 2026). Until this UX issue is fixed, I’ll use this.
 
 ## Requirements
 
@@ -17,10 +17,10 @@ The app is designed to work on **Linux, Windows, and macOS**, wherever Tkinter i
 ## Run
 
 ```sh
-python3 rolling_timer.py
+python3 ai_voice_usage.py
 ```
 
-Sessions are stored in a SQLite3 database and the window setting in TOML, under `~/.rolling_timer/` (your home directory).
+Sessions are stored in a SQLite3 database and the window setting in TOML, under `~/.ai-voice-usage/` (your home directory).
 
 ## Philosophy
 
