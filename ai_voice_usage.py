@@ -8,26 +8,26 @@ import sqlite3
 import sys
 import tkinter as tk
 import tomllib
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 APP_NAME = "AI-VoiceUsage"
 
 
-def data_directory() -> pathlib.Path:
-    if sys.platform == "win32":
-        return pathlib.Path(os.environ["LOCALAPPDATA"]) / APP_NAME
-    return pathlib.Path.home() / ".ai-voice-usage"
-
-
-AI_VOICE_USAGE_DIR = data_directory()
+AI_VOICE_USAGE_DIR = (
+    pathlib.Path(os.environ["LOCALAPPDATA"]) / APP_NAME
+    if sys.platform == "win32"
+    else pathlib.Path.home() / ".ai-voice-usage"
+)
 DATABASE_FILE = AI_VOICE_USAGE_DIR / "time_intervals.sqlite3"
 CONFIG_FILE = AI_VOICE_USAGE_DIR / "config.toml"
 ZERO_TIME = timedelta()
 
-
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+    
 @dataclass(frozen=True)
 class TimeInterval:
     start: datetime
@@ -88,7 +88,7 @@ def save_config(window: timedelta) -> None:
 def load_config() -> timedelta:
     if CONFIG_FILE.exists():
         with CONFIG_FILE.open("rb") as file:
-            return timedelta(hours=float(tomllib.load(file)["sliding_window_hours"]))
+            return window_from_hours(float(tomllib.load(file)["sliding_window_hours"]))
     return timedelta(hours=24)
 
 
@@ -116,10 +116,17 @@ INVALID = "#573735"
 
 
 class App:
-    def __init__(self, root: tk.Tk, db: sqlite3.Connection, window: timedelta):
+    def __init__(
+        self,
+        root: tk.Tk,
+        db: sqlite3.Connection,
+        window: timedelta,
+        clock: Callable[[], datetime] = utc_now,
+    ):
         self.root = root
         self.db = db
         self.window = window
+        self.clock = clock
         self.session_id: int | None = None
         self.edit_job: str | None = None
 
@@ -176,7 +183,7 @@ class App:
         self.tick()
 
     def toggle(self) -> None:
-        now = datetime.now(timezone.utc)
+        now = self.clock()
         if self.session_id is None:
             self.session_id = db_start_session(self.db, now)
             color, label = RED, "Stop"
@@ -218,7 +225,7 @@ class App:
             self.window_entry.configure(bg=FIELD)
 
     def update_display(self) -> None:
-        now = datetime.now(timezone.utc)
+        now = self.clock()
         if self.session_id is not None:
             db_update_session(self.db, self.session_id, now)
         used = time_used(
@@ -232,7 +239,7 @@ class App:
 
     def close(self) -> None:
         if self.session_id is not None:
-            db_update_session(self.db, self.session_id, datetime.now(timezone.utc))
+            db_update_session(self.db, self.session_id, self.clock())
         self.root.destroy()
 
 

@@ -13,6 +13,8 @@
         in {
           default = pkgs.mkShell {
             packages = [ (pkgs.python313.withPackages (ps: [ ps.tkinter ps.pyinstaller ])) ];
+            # Tcl and Tk live in separate Nix store paths; help PyInstaller find Tk's scripts.
+            TK_LIBRARY = "${pkgs.tk}/lib/tk${pkgs.lib.versions.majorMinor pkgs.tk.version}";
           };
         });
     };
