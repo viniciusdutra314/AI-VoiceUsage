@@ -2,7 +2,7 @@
 
 A small Python app for manually monitoring **ChatGPT Voice usage** over a sliding time window.
 
-Track how much time you have spent using ChatGPT Voice in the last 24 hours. Press **Start** to track a session and **Stop** to save it. The total updates automatically as older sessions leave the window.
+Track how much time you have spent using ChatGPT Voice in the last 24 hours. Press **Start** to track a session and **Stop** to save it. The total updates automatically as older sessions leave the window. A compact **Stats** button opens a 24-hour recovery forecast; the main window supports Dark and Light themes.
 
 ## Download
 
