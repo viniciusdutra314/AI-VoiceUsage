@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta, timezone
 from unittest.mock import patch
 
 import ai_voice_usage as app
+from usage_plot import forecast_points
 
 NOW = datetime.now(UTC)
 SECOND = timedelta(seconds=1)
@@ -130,6 +131,36 @@ class UsageTests(unittest.TestCase):
                 self.assertEqual(
                     app.format_duration(timedelta(seconds=seconds)), expected
                 )
+
+
+class ForecastTests(unittest.TestCase):
+    def test_empty_forecast_is_zero(self):
+        points = forecast_points([], NOW, app.SLIDING_WINDOW)
+        self.assertEqual(points, [
+            (NOW, timedelta()),
+            (NOW + app.SLIDING_WINDOW, timedelta()),
+        ])
+
+    def test_session_recovers_linearly(self):
+        interval = app.TimeInterval(NOW - 3 * HOUR, NOW - 3 * HOUR + 15 * SECOND)
+        values = dict(forecast_points([interval], NOW, app.SLIDING_WINDOW))
+        start = NOW + 21 * HOUR
+        end = start + 15 * SECOND
+        self.assertEqual(values[NOW], 15 * SECOND)
+        self.assertEqual(values[start], 15 * SECOND)
+        self.assertEqual(values[end], timedelta())
+        midway = start + 5 * SECOND
+        self.assertEqual(
+            app.time_used([interval],
+                          app.TimeInterval(midway - app.SLIDING_WINDOW, midway)),
+            10 * SECOND,
+        )
+
+    def test_active_session_is_capped_at_now(self):
+        interval = app.TimeInterval(NOW - 5 * SECOND, NOW + 10 * SECOND)
+        points = forecast_points([interval], NOW, app.SLIDING_WINDOW)
+        self.assertEqual(points[0][1], 5 * SECOND)
+        self.assertEqual(points[-1][1], timedelta())
 
 
 class DataDirectoryTests(unittest.TestCase):
