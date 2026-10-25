@@ -6,6 +6,7 @@ import pathlib
 import sqlite3
 import sys
 import tkinter as tk
+from usage_plot import StatisticsWindow
 from collections.abc import Callable, Iterable
 from contextlib import closing
 from dataclasses import dataclass
@@ -88,9 +89,11 @@ def format_duration(duration: timedelta) -> str:
 
 THEMES = {
     "dark": dict(bg="#0d1726", fg="#eaf2ff", hover="#1c304a",
-                 accent="#2563eb", stop="#b83d55"),
+                 accent="#2563eb", stop="#b83d55",
+                 grid="#263d57", muted="#a9b9d1"),
     "light": dict(bg="#edf5ff", fg="#152a45", hover="#dbeafe",
-                  accent="#1d4ed8", stop="#be123c"),
+                  accent="#1d4ed8", stop="#be123c",
+                  grid="#ccd9ec", muted="#4b617b"),
 }
 
 
@@ -106,6 +109,8 @@ class App:
         self.clock = clock
         self.session_id: int | None = None
         self.dark_mode = True
+        self.stats_window = None
+        self.ticks = 0
 
         root.title(APP_NAME)
         root.resizable(False, False)
@@ -131,10 +136,27 @@ class App:
             font=("Arial", 18), width=2,
         )
         self.theme_button.place(relx=1, x=-8, y=8, anchor="ne")
+        self.stats_button = tk.Button(
+            root, text="Stats", command=self.open_statistics,
+            relief="flat", borderwidth=0, font=("Arial", 10),
+        )
+        self.stats_button.place(x=8, y=8, anchor="nw")
         self.apply_theme()
 
         root.protocol("WM_DELETE_WINDOW", self.close)
         self.tick()
+
+    def open_statistics(self) -> None:
+        if self.stats_window is None or not self.stats_window.window.winfo_exists():
+            colors = THEMES["dark" if self.dark_mode else "light"]
+            self.stats_window = StatisticsWindow(self.root, colors)
+        else:
+            self.stats_window.window.lift()
+        self.refresh_statistics()
+
+    def refresh_statistics(self) -> None:
+        if self.stats_window is not None and self.stats_window.window.winfo_exists():
+            self.stats_window.render(db_load_intervals(self.db), self.clock(), SLIDING_WINDOW)
 
     def toggle_theme(self) -> None:
         self.dark_mode = not self.dark_mode
@@ -144,6 +166,8 @@ class App:
         colors = THEMES["dark" if self.dark_mode else "light"]
         self.root.configure(bg=colors["bg"])
         for widget in self.root.winfo_children():
+            if isinstance(widget, tk.Toplevel):
+                continue
             widget.configure(bg=colors["bg"], fg=colors["fg"])
             if isinstance(widget, tk.Button):
                 widget.configure(activebackground=colors["hover"],
@@ -152,6 +176,8 @@ class App:
         self.toggle_button.configure(bg=color, activebackground=color,
                                      fg="white", activeforeground="white")
         self.theme_button.configure(text="☀" if self.dark_mode else "☾")
+        if self.stats_window is not None and self.stats_window.window.winfo_exists():
+            self.stats_window.apply_theme(colors)
 
     def toggle(self) -> None:
         now = self.clock()
@@ -177,6 +203,9 @@ class App:
 
     def tick(self) -> None:
         self.update_display()
+        self.ticks += 1
+        if self.ticks % 5 == 0:
+            self.refresh_statistics()
         self.root.after(1000, self.tick)
 
     def close(self) -> None:
