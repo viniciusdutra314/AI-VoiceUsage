@@ -36,20 +36,13 @@ jobs:
 
       - name: Build application
         # Strip symbols on Linux; keep Windows/macOS binaries untouched.
-        run: python -m PyInstaller --onefile --windowed ${{ runner.os == 'Linux' && '--strip' || '' }} --name ai-voice-usage ai_voice_usage.py
-
-      - name: Archive application
-        uses: thedoctor0/zip-release@0.7.6
-        with:
-          directory: dist
-          path: ${{ runner.os == 'macOS' && 'ai-voice-usage.app' || runner.os == 'Windows' && 'ai-voice-usage.exe' || 'ai-voice-usage' }}
-          type: ${{ runner.os == 'Windows' && 'zip' || 'tar' }}
-          filename: ../${{ env.ASSET_NAME }}.${{ runner.os == 'Windows' && 'zip' || 'tar.gz' }}
+        run: python -m PyInstaller --onefile --windowed ${{ runner.os == 'Linux' && '--strip' || '' }} --name ${{ env.ASSET_NAME }} ai_voice_usage.py
 
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ env.ASSET_NAME }}
-          path: ${{ env.ASSET_NAME }}.*
+          # Upload only the executable, including on macOS where an .app is also built.
+          path: dist/${{ env.ASSET_NAME }}${{ runner.os == 'Windows' && '.exe' || '' }}
           if-no-files-found: error
 
   release:
