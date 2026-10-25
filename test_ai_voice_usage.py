@@ -1,10 +1,9 @@
 import pathlib
 import runpy
 import sqlite3
-import tempfile
 import unittest
 from datetime import UTC, datetime, timedelta, timezone
-from unittest.mock import DEFAULT, Mock, patch
+from unittest.mock import patch
 
 import ai_voice_usage as app
 
@@ -119,17 +118,6 @@ class UsageTests(unittest.TestCase):
         window = app.TimeInterval(NOW + 10 * SECOND, NOW + 30 * SECOND)
         self.assertEqual(app.time_used(sessions, window), timedelta())
 
-    def test_positive_and_fractional_window(self):
-        for hours in [0.5, 1, 24, 48]:
-            with self.subTest(hours=hours):
-                self.assertEqual(app.window_from_hours(hours), hours * HOUR)
-
-    def test_invalid_window(self):
-        for hours in [0, -1, float("nan"), float("inf"), -float("inf")]:
-            with self.subTest(hours=hours):
-                with self.assertRaises(ValueError):
-                    app.window_from_hours(hours)
-
     def test_duration_format(self):
         for seconds, expected in [
             (0, "00:00:00"),
@@ -148,7 +136,6 @@ class DataDirectoryTests(unittest.TestCase):
     def test_data_paths_share_application_directory(self):
         directory = app.AI_VOICE_USAGE_DIR
         self.assertEqual(app.DATABASE_FILE, directory / "time_intervals.sqlite3")
-        self.assertEqual(app.CONFIG_FILE, directory / "config.toml")
 
     def test_windows_uses_local_app_data(self):
         local = pathlib.Path("custom-local-app-data")
@@ -229,34 +216,6 @@ class DatabaseTests(SQLiteTestCase):
                 app.TimeInterval(NOW + HOUR, NOW + HOUR),
             ],
         )
-
-
-class ConfigTests(unittest.TestCase):
-    def setUp(self):
-        temporary = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary.cleanup)
-        self.path = pathlib.Path(temporary.name) / "config.toml"
-        # Monkey patching the CONFIG_FILE to use a fake one
-        self.enterContext(patch.object(app, "CONFIG_FILE", self.path))
-
-    def test_missing_file_defaults_to_24_hours(self):
-        self.assertEqual(app.load_config(), 24 * HOUR)
-        self.assertFalse(self.path.exists())
-
-    def test_save_load_and_overwrite(self):
-        for hours in [24, 1.5, 0.25]:
-            with self.subTest(hours=hours):
-                app.save_config(hours * HOUR)
-                self.assertEqual(app.load_config(), hours * HOUR)
-
-    def test_invalid_saved_window_is_rejected(self):
-        for hours in ("0", "-1", "nan", "inf", "1e308"):
-            with self.subTest(hours=hours):
-                self.path.write_text(
-                    f"sliding_window_hours = {hours}\n", encoding="utf-8"
-                )
-                with self.assertRaises((ValueError, OverflowError)):
-                    app.load_config()
 
 
 if __name__ == "__main__":

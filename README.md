@@ -2,7 +2,7 @@
 
 A small Python app for manually monitoring **ChatGPT Voice usage** over a sliding time window.
 
-Track how much time you have spent using ChatGPT Voice in the last N hours. Press **Start** to track a session and **Stop** to save it. The total updates automatically as older sessions leave the window. You can change the window size directly in the app.
+Track how much time you have spent using ChatGPT Voice in the last 24 hours. Press **Start** to track a session and **Stop** to save it. The total updates automatically as older sessions leave the window.
 
 ## Download
 
@@ -14,12 +14,12 @@ Download the executable for your operating system and architecture. No installat
 | <img src="assets/macos.png" width="20" height="20" alt=""> macOS | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-macos-x64) | [Download (Apple Silicon)](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-macos-arm64) |
 | <img src="assets/linux.png" width="20" height="20" alt=""> Linux | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-linux-x64) | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-linux-arm64) |
 
-Sessions are saved in `time_intervals.sqlite3`, and settings are saved in `config.toml`, in the following folder:
+Sessions are saved in `time_intervals.sqlite3` in the following folder:
 
 - **Windows:** `%LOCALAPPDATA%\AI-VoiceUsage\` (paste this path into the File Explorer address bar).
 - **Linux and macOS:** `~/.ai-voice-usage/` (`~` is your home directory).
 
-These files are stored separately from the executable, so moving it does not move your data.
+The database is stored separately from the executable, so moving it does not move your data.
 
 ## Motivation
 
