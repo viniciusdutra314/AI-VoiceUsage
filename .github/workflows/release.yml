@@ -1,0 +1,73 @@
+name: Build and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {target: linux-x64, runner: ubuntu-22.04}  #old so glibc is also old
+          - {target: linux-arm64, runner: ubuntu-22.04-arm}
+          - {target: windows-x64, runner: windows-2022}
+          - {target: windows-arm64, runner: windows-11-arm}
+          - {target: macos-x64, runner: macos-15-intel}
+          - {target: macos-arm64, runner: macos-15}
+    env:
+      ASSET_NAME: ai-voice-usage-${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.13'
+      - run: python -m pip install pyinstaller==6.18.0
+
+      - name: Build application
+        # Strip symbols on Linux; keep Windows/macOS binaries untouched.
+        run: python -m PyInstaller --onefile --windowed ${{ runner.os == 'Linux' && '--strip' || '' }} --name ai-voice-usage ai_voice_usage.py
+
+      - name: Archive application
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          directory: dist
+          path: ${{ runner.os == 'macOS' && 'ai-voice-usage.app' || runner.os == 'Windows' && 'ai-voice-usage.exe' || 'ai-voice-usage' }}
+          type: ${{ runner.os == 'Windows' && 'zip' || 'tar' }}
+          filename: ../${{ env.ASSET_NAME }}.${{ runner.os == 'Windows' && 'zip' || 'tar.gz' }}
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: ${{ env.ASSET_NAME }}.*
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: ai-voice-usage-*
+          path: artifacts
+          merge-multiple: true
+      - name: Publish release with all six builds
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          files: artifacts/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
