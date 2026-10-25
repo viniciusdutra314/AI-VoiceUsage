@@ -1,5 +1,5 @@
 {
-  description = "Python environment for ai-voice-usage";
+  description = "Python environment for AI-VoiceUsage";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
@@ -12,7 +12,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in {
           default = pkgs.mkShell {
-            packages = [ (pkgs.python313.withPackages (ps: [ ps.tkinter ])) ];
+            packages = [ (pkgs.python313.withPackages (ps: [ ps.tkinter ps.pyinstaller ])) ];
           };
         });
     };

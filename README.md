@@ -1,4 +1,4 @@
-# ai-voice-usage
+# AI-VoiceUsage
 
 A small Python app for manually monitoring **ChatGPT Voice usage** over a sliding time window.
 
@@ -10,28 +10,19 @@ Download the executable for your operating system and architecture. No installat
 
 | Operating system | x64 (Intel / AMD) | ARM64 |
 | --- | --- | --- |
-| <img src="assets/windows.png" width="20" height="20" alt=""> Windows | [Download .exe](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/ai-voice-usage-windows-x64.exe) | [Download .exe](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/ai-voice-usage-windows-arm64.exe) |
-| <img src="assets/macos.png" width="20" height="20" alt=""> macOS | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/ai-voice-usage-macos-x64) | [Download (Apple Silicon)](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/ai-voice-usage-macos-arm64) |
-| <img src="assets/linux.png" width="20" height="20" alt=""> Linux | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/ai-voice-usage-linux-x64) | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/ai-voice-usage-linux-arm64) |
+| <img src="assets/windows.png" width="20" height="20" alt=""> Windows | [Download .exe](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-windows-x64.exe) | [Download .exe](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-windows-arm64.exe) |
+| <img src="assets/macos.png" width="20" height="20" alt=""> macOS | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-macos-x64) | [Download (Apple Silicon)](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-macos-arm64) |
+| <img src="assets/linux.png" width="20" height="20" alt=""> Linux | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-linux-x64) | [Download](https://github.com/viniciusdutra314/ai-voice-usage/releases/latest/download/AI-VoiceUsage-linux-arm64) |
+
+Sessions are saved in `time_intervals.sqlite3`, and settings are saved in `config.toml`, in the following folder:
+
+- **Windows:** `%LOCALAPPDATA%\AI-VoiceUsage\` (paste this path into the File Explorer address bar).
+- **Linux and macOS:** `~/.ai-voice-usage/` (`~` is your home directory).
+
+These files are stored separately from the executable, so moving it does not move your data.
 
 ## Motivation
 
 Shouldn’t the ChatGPT interface provide this information? Yes, it should, but apparently it doesn’t (last checked on October 24, 2026). Until this UX issue is fixed, I’ll use this.
 
-## Requirements
-
-- **Python 3.12+** with `tkinter` and `sqlite3` support (usually included with Python).
-
-The app is designed to work on **Linux, Windows, and macOS**, wherever Tkinter is available.
-
-## Run
-
-```sh
-python3 ai_voice_usage.py
-```
-
-Sessions are stored in a SQLite3 database, and the window setting is stored in a TOML file, both under `~/.ai-voice-usage/` in your home directory.
-
-## Philosophy
-
-One Python file, roughly 200 lines, and only the standard library. The point is to be **simple, useful, and easy to hack on**.
+The app keeps things simple: one Python file (~200 lines) and only the standard library. The point is to be **simple, useful, and easy to hack on**.

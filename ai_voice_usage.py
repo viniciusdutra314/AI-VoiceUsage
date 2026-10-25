@@ -2,8 +2,10 @@
 """Manually monitor ChatGPT Voice usage over a sliding time window."""
 
 import math
+import os
 import pathlib
 import sqlite3
+import sys
 import tkinter as tk
 import tomllib
 from collections.abc import Iterable
@@ -11,8 +13,16 @@ from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
-APP_NAME = "ai-voice-usage"
-AI_VOICE_USAGE_DIR = pathlib.Path.home() / f".{APP_NAME}"
+APP_NAME = "AI-VoiceUsage"
+
+
+def data_directory() -> pathlib.Path:
+    if sys.platform == "win32":
+        return pathlib.Path(os.environ["LOCALAPPDATA"]) / APP_NAME
+    return pathlib.Path.home() / ".ai-voice-usage"
+
+
+AI_VOICE_USAGE_DIR = data_directory()
 DATABASE_FILE = AI_VOICE_USAGE_DIR / "time_intervals.sqlite3"
 CONFIG_FILE = AI_VOICE_USAGE_DIR / "config.toml"
 ZERO_TIME = timedelta()
