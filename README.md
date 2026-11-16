@@ -21,8 +21,31 @@ Sessions are saved in `time_intervals.sqlite3` in the following folder:
 
 The database is stored separately from the executable, so moving it does not move your data.
 
+## Nix
+
+Run the app with Nix (Linux or macOS):
+
+```sh
+nix run github:viniciusdutra314/AI-VoiceUsage
+```
+
+For Home Manager, add the flake input:
+
+```nix
+inputs.ai-voice-usage.url = "github:viniciusdutra314/AI-VoiceUsage";
+```
+
+Then add the package to `home.packages`, using your flake's `inputs`:
+
+```nix
+home.packages = [
+  inputs.ai-voice-usage.packages.${pkgs.stdenv.hostPlatform.system}.default
+];
+```
+
+
 ## Motivation
 
-Shouldn’t the ChatGPT interface provide this information? Yes, it should, but apparently it doesn’t (last checked on October 24, 2026). Until this UX issue is fixed, I’ll use this.
+Shouldn’t the ChatGPT interface provide this information? Yes, it should, but apparently it doesn’t (last checked on November 16, 2026). Until this UX issue is fixed, I’ll use this.
 
 The app keeps things simple: one Python file (~200 lines) and only the standard library. The point is to be **simple, useful, and easy to hack on**.
